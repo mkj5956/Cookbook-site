@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "demo": true,
+  "publishedAt": "",
+  "items": [
+    {
+      "slot": 0,
+      "name": "아이보리 티셔츠",
+      "category": "tops",
+      "thumbnail": "demo/item-1.svg",
+      "poster": "",
+      "model": "demo/look-1.glb",
+      "source": "demo",
+      "products": [
+        {
+          "name": "아이보리 티셔츠",
+          "image": "demo/item-1.svg",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "slot": 1,
+      "name": "세이지 니트",
+      "category": "tops",
+      "thumbnail": "demo/item-2.svg",
+      "poster": "",
+      "model": "demo/look-2.glb",
+      "source": "demo",
+      "products": [
+        {
+          "name": "세이지 니트",
+          "image": "demo/item-2.svg",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "slot": 2,
+      "name": "네이비 셔츠",
+      "category": "tops",
+      "thumbnail": "demo/item-3.svg",
+      "poster": "",
+      "model": "demo/look-3.glb",
+      "source": "demo",
+      "products": [
+        {
+          "name": "네이비 셔츠",
+          "image": "demo/item-3.svg",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "slot": 3,
+      "name": "브라운 재킷",
+      "category": "tops",
+      "thumbnail": "demo/item-4.svg",
+      "poster": "",
+      "model": "demo/look-4.glb",
+      "source": "demo",
+      "products": [
+        {
+          "name": "브라운 재킷",
+          "image": "demo/item-4.svg",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "slot": 4,
+      "name": "테라코타 원피스",
+      "category": "one-pieces",
+      "thumbnail": "demo/item-5.svg",
+      "poster": "",
+      "model": "demo/look-5.glb",
+      "source": "demo",
+      "products": [
+        {
+          "name": "테라코타 원피스",
+          "image": "demo/item-5.svg",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "slot": 5,
+      "name": "그레이 롱 코트",
+      "category": "tops",
+      "thumbnail": "demo/item-6.svg",
+      "poster": "",
+      "model": "demo/look-6.glb",
+      "source": "demo",
+      "products": [
+        {
+          "name": "그레이 롱 코트",
+          "image": "demo/item-6.svg",
+          "link": ""
+        }
+      ]
+    }
+  ]
+}

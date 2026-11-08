@@ -70,5 +70,13 @@ class LocalAPITest(unittest.TestCase):
         img=server.decode_image(image_data());self.assertEqual(img.mode,'RGB');r,g,b=img.getpixel((0,0));self.assertEqual(r,255);self.assertGreater(g,100);self.assertGreater(b,100)
     def test_unknown_job(self):
         self.assertEqual(self.request('/api/jobs/'+'b'*32)[0],404)
+    def test_3d_requests_are_authenticated_and_keep_only_photo(self):
+        payload={'kind':'3d','image':image_data(),'url':'https://evil.test'}
+        self.assertEqual(self.request('/api/jobs','POST',payload,headers={'Authorization':''})[0],401)
+        self.assertEqual(self.request('/api/jobs','POST',payload)[0],202)
+        self.assertEqual(set(self.jobs.last),{'kind','image'})
+    def test_new_static_files_and_binary_models_are_served(self):
+        for path in ['/admin.html','/catalog-core.js','/vendor/model-viewer.min.js','/demo/catalog.json','/demo/look-1.glb']:
+            self.assertEqual(self.request(path)[0],200)
 
 if __name__=='__main__':unittest.main()

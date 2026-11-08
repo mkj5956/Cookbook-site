@@ -61,6 +61,13 @@ def decode_image(value):
 def validate_payload(payload):
     if not isinstance(payload, dict):
         raise ValueError('올바른 요청이 아닙니다.')
+    if payload.get('kind') == '3d':
+        decode_image(payload.get('image'))
+        return {'kind': '3d', 'image': payload['image']}
+    if payload.get('kind') not in {None, 'tryon'}:
+        raise ValueError('지원하지 않는 AI 작업입니다.')
+    if 'output3d' in payload and type(payload['output3d']) is not bool:
+        raise ValueError('3D 생성 옵션이 올바르지 않습니다.')
     if payload.get('category') not in CATEGORIES:
         raise ValueError('옷 종류를 선택해주세요.')
     if payload.get('photo_type') not in {'model', 'flat-lay'}:
@@ -71,7 +78,9 @@ def validate_payload(payload):
         raise ValueError('시드 값이 올바르지 않습니다.')
     decode_image(payload.get('person'))
     decode_image(payload.get('garment'))
-    return {key: payload[key] for key in ('person', 'garment', 'category', 'photo_type', 'steps', 'seed')}
+    result = {key: payload[key] for key in ('person', 'garment', 'category', 'photo_type', 'steps', 'seed')}
+    result['output3d'] = payload.get('output3d', False)
+    return result
 
 
 def inspect_runtime():
@@ -98,6 +107,15 @@ def inspect_runtime():
 
 def run_inference(output, payload):
     try:
+        if payload.get('kind') == '3d':
+            from reconstruct import build_mesh, inspect_3d
+            health = inspect_3d()
+            if not health['ready']:
+                output.put({'status': 'error', 'error': health['message']})
+                return
+            mesh = build_mesh(decode_image(payload['image']), lambda message: output.put({'status': 'running', 'message': message}))
+            output.put({'status': 'done', 'glb': 'data:model/gltf-binary;base64,' + base64.b64encode(mesh).decode('ascii')})
+            return
         output.put({'status': 'running', 'message': '내 PC에서 AI 모델을 불러오고 있습니다. 첫 단계는 시간이 걸릴 수 있어요.'})
         import torch  # Loads CUDA runtime DLLs before ONNX Runtime on Windows.
         import onnxruntime as ort
@@ -106,11 +124,30 @@ def run_inference(output, payload):
         from fashn_vton import TryOnPipeline
         person, garment = decode_image(payload['person']), decode_image(payload['garment'])
         pipeline = TryOnPipeline(weights_dir=str(ROOT / 'weights'), device='cuda')
-        output.put({'status': 'running', 'message': '체형과 옷을 분석해 가상착용 사진을 만들고 있습니다.'})
+        output.put({'status': 'running', 'message': '1/2 · 체형과 옷을 분석해 가상착용 사진을 만들고 있습니다.'})
         result = pipeline(person_image=person, garment_image=garment, category=payload['category'], garment_photo_type=payload['photo_type'], num_samples=1, num_timesteps=payload['steps'], seed=payload['seed'], segmentation_free=True)
         buffer = io.BytesIO()
         result.images[0].save(buffer, format='PNG')
-        output.put({'status': 'done', 'message': '완료', 'image': 'data:image/png;base64,' + base64.b64encode(buffer.getvalue()).decode('ascii')})
+        fitted = result.images[0].copy()
+        response = {'status': 'done', 'message': '완료', 'image': 'data:image/png;base64,' + base64.b64encode(buffer.getvalue()).decode('ascii')}
+        if payload.get('output3d'):
+            # Free try-on weights before loading reconstruction: GPUs need not
+            # hold both models simultaneously. Keep the 2D result on 3D failure.
+            del pipeline, result, person, garment
+            import gc
+            gc.collect()
+            torch.cuda.empty_cache()
+            try:
+                from reconstruct import build_mesh, inspect_3d
+                health = inspect_3d()
+                if not health['ready']:
+                    raise ValueError(health['message'])
+                mesh = build_mesh(fitted, lambda message: output.put({'status': 'running', 'message': message}))
+                response['glb'] = 'data:model/gltf-binary;base64,' + base64.b64encode(mesh).decode('ascii')
+            except Exception as exc:
+                print(f'3D error: {type(exc).__name__}: {exc}', flush=True)
+                response['three_d_error'] = str(exc)[:300] or '3D 생성 실패. PC 실행 창을 확인해주세요.'
+        output.put(response)
     except Exception as exc:
         detail = str(exc)
         print(f'AI error: {type(exc).__name__}: {detail}', flush=True)
@@ -305,7 +342,8 @@ class Handler(BaseHTTPRequestHandler):
             if not self._auth():
                 return
             if path == '/api/health':
-                return self._json(200, self.server.jobs.runtime_check())
+                from reconstruct import inspect_3d
+                return self._json(200, {**self.server.jobs.runtime_check(), 'three_d': inspect_3d()})
             match = re.fullmatch(r'/api/jobs/([a-f0-9]{32})', path)
             if match:
                 try:
@@ -316,7 +354,16 @@ class Handler(BaseHTTPRequestHandler):
         if not self._trusted():
             return
         # Only these public files may be served. Never expose model weights or data.
-        static = {'/': ('index.html', 'text/html'), '/index.html': ('index.html', 'text/html'), '/styles.css': ('styles.css', 'text/css'), '/app.js': ('app.js', 'text/javascript'), '/core.js': ('core.js', 'text/javascript'), '/favicon.svg': ('favicon.svg', 'image/svg+xml')}
+        static = {'/': ('index.html', 'text/html'), '/index.html': ('index.html', 'text/html'), '/admin.html': ('admin.html', 'text/html'), '/favicon.svg': ('favicon.svg', 'image/svg+xml'), '/catalog.json': ('catalog.json', 'application/json'), '/vendor/model-viewer.min.js': ('vendor/model-viewer.min.js', 'text/javascript')}
+        for name in ('styles.css', 'showroom.css'):
+            static['/' + name] = (name, 'text/css')
+        for name in ('app.js', 'core.js', 'catalog-core.js', 'viewer.js', 'admin-auth.js', 'github-publisher.js'):
+            static['/' + name] = (name, 'text/javascript')
+        if path == '/demo/catalog.json':
+            static[path] = ('demo/catalog.json', 'application/json')
+        if re.fullmatch(r'/demo/(look-[1-6]\.glb|item-[1-6]\.svg)', path) or re.fullmatch(r'/media/[a-f0-9]{64}\.(glb|jpg|png|webp)', path):
+            import mimetypes
+            static[path] = (path[1:], 'model/gltf-binary' if path.endswith('.glb') else mimetypes.guess_type(path)[0] or 'application/octet-stream')
         if path not in static:
             return self._json(404, {'error': '주소를 찾을 수 없습니다.'})
         name, mime = static[path]
@@ -369,7 +416,7 @@ def main():
         return 1
     print('\n룩북 PC AI를 시작했습니다. 이 창을 열어두세요. 종료: Ctrl+C', flush=True)
     print(f'연결 코드: {token}', flush=True)
-    target = 'http://127.0.0.1:8765/' if args.local_page else PAGES_URL
+    target = 'http://127.0.0.1:8765/admin.html' if args.local_page else PAGES_URL + 'admin.html'
     url = target + '#local-token=' + quote(token)
     if not args.no_browser:
         webbrowser.open(url)

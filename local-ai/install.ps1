@@ -58,4 +58,5 @@ Run-Python -Arguments @('-m', 'pip', 'install', '--upgrade', 'pip', 'setuptools'
 Run-Python -Arguments @('-m', 'pip', 'install', 'torch==2.8.0', 'torchvision==0.23.0', '--index-url', 'https://download.pytorch.org/whl/cu128')
 Run-Python -Arguments @('-m', 'pip', 'install', '-r', (Join-Path $Root 'requirements.txt'), '-c', (Join-Path $Root 'constraints.txt'))
 Run-Python -Arguments @((Join-Path $Root 'prepare_models.py'))
+& (Join-Path $Root 'install_3d.ps1')
 Write-Host 'Setup complete. Double-click 2_START.bat to open your lookbook.' -ForegroundColor Green

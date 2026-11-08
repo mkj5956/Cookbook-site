@@ -8,5 +8,6 @@ local-ai/data/
 local-ai/logs/
 local-ai/vendor/
 local-ai/.ready.json
+local-ai/.ready3d.json
 *.lookbook.json
 .openai/

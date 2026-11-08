@@ -1,0 +1,11 @@
+# Existing CUDA PyTorch/ONNX Runtime are shared with virtual try-on.
+omegaconf==2.3.0
+transformers==4.44.2
+trimesh==4.6.13
+scikit-image==0.25.2
+rembg==2.0.67
+imageio>=2.34,<3
+einops>=0.7,<1
+numpy>=1.26,<3
+pillow>=11.3,<13
+huggingface_hub>=0.35,<1

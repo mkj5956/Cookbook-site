@@ -28,13 +28,20 @@
     const model = value.model ? { image: imageData(value.model.image), name: String(value.model.name || '내 모델').slice(0, 80) } : null;
     const current = value.current && model ? { image: imageData(value.current.image), items: products(value.current.items), created: Number(value.current.created) || Date.now() } : null;
     const history = (Array.isArray(value.history) ? value.history : []).slice(0, 20).map((v, i) => ({ id: String(v.id || i).replace(/[^a-zA-Z0-9-]/g, '').slice(0, 80), image: imageData(v.image), items: products(v.items), created: Number(v.created) || Date.now(), original: v.original ? imageData(v.original) : (model?.image || null) }));
-    return { type: 'lookbook-studio', version: 1, model, garments: value.garments.map(item), current, history, quality: [20, 30, 50].includes(Number(value.quality)) ? Number(value.quality) : 30, layerMode: Boolean(value.layerMode) };
+    const garments = value.garments.map(item);
+    const prepared = Array.from({length: 6}, (_, i) => {
+      const p = value.prepared?.[i];
+      if (!p || !garments[i] || !model) return null;
+      const catalog = root.LookbookCatalog || require('./catalog-core.js');
+      return { image: imageData(p.image), glb: catalog.modelData(p.glb), items: products(p.items), source: p.source === 'uploaded' ? 'uploaded' : 'ai', created: Number(p.created) || Date.now() };
+    });
+    return { type: 'lookbook-studio', version: 1, model, garments, current, history, prepared, quality: [20, 30, 50].includes(Number(value.quality)) ? Number(value.quality) : 30, layerMode: Boolean(value.layerMode) };
   }
   function mergeOutfit(previous, garment, layering) {
     if (!layering || garment.category === 'one-pieces') return [{ ...garment }];
     return [...previous.filter(v => v.category !== garment.category && v.category !== 'one-pieces'), { ...garment }];
   }
-  function emptyProject() { return { type: 'lookbook-studio', version: 1, model: null, garments: Array(6).fill(null), current: null, history: [], quality: 30, layerMode: false }; }
+  function emptyProject() { return { type: 'lookbook-studio', version: 1, model: null, garments: Array(6).fill(null), current: null, history: [], prepared: Array(6).fill(null), quality: 30, layerMode: false }; }
   const api = { CATEGORIES, coupangURL, imageData, normalizeProject, mergeOutfit, emptyProject };
   root.LookbookCore = api;
   if (typeof module !== 'undefined') module.exports = api;
