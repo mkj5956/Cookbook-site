@@ -83,7 +83,11 @@
       const r=await fetch(url,{signal:this.controller.signal,credentials:'omit'});if(!r.ok)throw new Error('3D 파일을 불러오지 못했습니다.');
       if(Number(r.headers.get('Content-Length'))>20*1024*1024)throw new Error('3D 파일이 너무 큽니다.');
       const bytes=await r.arrayBuffer();if(version!==this.version)return false;
-      this.mesh=parse(bytes);this.yaw=0;this.pitch=.08;this.zoom=1;this.draw();return true;
+      this.mesh=parse(bytes);
+      const min=[Infinity,Infinity],max=[-Infinity,-Infinity];
+      for(const p of this.mesh.points)for(let i=0;i<2;i++){min[i]=Math.min(min[i],p[i]);max[i]=Math.max(max[i],p[i]);}
+      this.fitSize=max.map((v,i)=>Math.max(.01,v-min[i]));
+      this.yaw=0;this.pitch=.08;this.zoom=1;this.draw();return true;
     }
     reset(){this.yaw=0;this.pitch=.08;this.zoom=1;this.schedule();}
     rotate(on){this.auto=on;this.schedule();}
@@ -94,7 +98,7 @@
       const width=Math.min(650,Math.round(box.width)),height=Math.round(width*box.height/box.width);
       if(this.canvas.width!==width||this.canvas.height!==height){this.canvas.width=width;this.canvas.height=height;}
       const ctx=this.ctx;ctx.clearRect(0,0,width,height);
-      const scale=Math.min(width*.9,height*.85)*this.zoom;
+      const scale=(this.canvas.dataset.fit==='portrait' ? Math.min(width*.66/this.fitSize[0],height*.92/this.fitSize[1]) : Math.min(width*.9,height*.85))*this.zoom;
       ctx.fillStyle='#686c5720';ctx.beginPath();ctx.ellipse(width/2,height/2+scale*.52,scale*.24,scale*.025,0,0,Math.PI*2);ctx.fill();
       const vertices=project(this.mesh.points,this.yaw,this.pitch);
       const faces=this.mesh.faces.map(f=>({...f,z:f.ids.reduce((s,i)=>s+vertices[i][2],0)/3})).sort((a,b)=>a.z-b.z);
