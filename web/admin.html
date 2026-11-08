@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="모델과 옷 사진으로 만드는 나만의 룩북. 내 PC의 AI로 가상착용하고 쿠팡 상품 링크까지 함께 보관하세요.">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' blob: https://api.github.com http://127.0.0.1:8765; worker-src 'self' blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' blob: https://api.github.com http://127.0.0.1:8765; worker-src 'self' blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <title>관리자 · LOOKBOOK STUDIO</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
@@ -13,7 +13,7 @@
   <script src="./catalog-core.js" defer></script>
   <script src="./github-publisher.js" defer></script>
   <script src="./admin-auth.js" defer></script>
-  <script type="module" src="./vendor/model-viewer.min.js"></script>
+  <script src="./viewer-support.js" defer></script><script src="./software-3d.js" defer></script>
   <link rel="stylesheet" href="./showroom.css">
 </head>
 <body class="admin-page">
@@ -52,7 +52,7 @@
             <div class="stage-number" aria-hidden="true">LOOK / <span id="lookNumber">01</span></div>
           </div>
           <div class="stage-actions"><button id="originalBtn" class="text-button" disabled><span data-icon="compare"></span>원본 보기</button><button id="resetBtn" class="text-button" disabled><span data-icon="reset"></span>처음부터</button><button id="downloadBtn" class="text-button" disabled><span data-icon="download"></span>이미지 저장</button></div>
-          <section class="admin-3d"><div class="section-heading"><h3>3D 착용 미리보기</h3><span id="threeDState">의상을 선택해주세요</span></div><model-viewer id="adminViewer" camera-controls touch-action="pan-y" environment-image="neutral" shadow-intensity="1" camera-orbit="0deg 80deg auto" alt="공개할 3D 착용 캐릭터" hidden></model-viewer><p id="threeDHint" class="muted">착용 사진이 완성되면 3D를 자동으로 생성합니다. 등록한 3D 파일로 교체할 수도 있어요.</p><div class="stage-actions"><button id="generate3DBtn" class="secondary-button" disabled>3D 다시 생성</button><button id="importGLBBtn" class="text-button" disabled>3D 파일 등록</button></div><small>AI가 보이지 않는 면을 추정합니다. 회전해서 얼굴·등·옷 디테일을 확인한 뒤 공개하세요.</small></section>
+          <section class="admin-3d"><div class="section-heading"><h3>3D 착용 미리보기</h3><span id="threeDState">의상을 선택해주세요</span></div><canvas id="adminSoftwareViewer" class="admin-software-viewer" tabindex="0" role="img" aria-label="공개할 3D 캐릭터. 드래그 또는 방향키로 회전" hidden></canvas><model-viewer id="adminViewer" camera-controls touch-action="pan-y" environment-image="neutral" shadow-intensity="1" camera-orbit="0deg 80deg auto" alt="공개할 3D 착용 캐릭터" hidden></model-viewer><p id="threeDHint" class="muted">착용 사진이 완성되면 3D를 자동으로 생성합니다. 등록한 3D 파일로 교체할 수도 있어요.</p><div class="stage-actions"><button id="generate3DBtn" class="secondary-button" disabled>3D 다시 생성</button><button id="importGLBBtn" class="text-button" disabled>3D 파일 등록</button></div><small>AI가 보이지 않는 면을 추정합니다. 회전해서 얼굴·등·옷 디테일을 확인한 뒤 공개하세요.</small></section>
           <div id="productPanel" class="product-panel"><div class="product-heading"><span data-icon="bag"></span><h3 id="productTitle">착용 아이템</h3></div><div id="productList"><p class="muted">옷을 입히면 쿠팡 상품 링크가 여기에 표시됩니다.</p></div></div>
         </section>
         <aside class="wardrobe right-wardrobe"><div class="section-heading"><h2>더해볼 아이템</h2><span>04 — 06</span></div><div id="rightSlots" class="slot-list"></div></aside>

@@ -28,7 +28,7 @@ function element(tag, className, text) { const e = document.createElement(tag); 
 let state = Core.emptyProject(), db = null, saveQueue = Promise.resolve(), busy = false, selected = -1;
 let draft = null, editing = -1, currentJob = null, cancelRequested = false, showingOriginal = false, connected = false;
 let toastTimer, timer, restoreTimer, token = '';
-let previewGLB = '', previewURL = '', publishing = false;
+let previewGLB = '', previewURL = '', publishing = false, adminSoftware = null, softwareSource = '';
 try { token = sessionStorage.getItem('lookbook-local-token') || ''; } catch (_) { /* Session-only fallback. */ }
 function toast(message) { $('toast').textContent = message; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').hidden = true, 5500); }
 function feedback(message = '') { $('feedback').textContent = message; $('feedback').hidden = !message; }
@@ -127,7 +127,7 @@ function renderGallery() {
 function render3D() {
   const prepared = state.prepared[selected];
   const hasItem = selected >= 0 && Boolean(state.garments[selected]);
-  $('adminViewer').hidden = !prepared;
+  $('adminViewer').hidden = !prepared || !window.Lookbook3D?.available;
   if ((prepared?.glb || '') !== previewGLB) {
     previewGLB = prepared?.glb || '';
     if (previewURL) URL.revokeObjectURL(previewURL);
@@ -138,8 +138,14 @@ function render3D() {
       $('adminViewer').setAttribute('src', previewURL);
     } else $('adminViewer').removeAttribute('src');
   }
+  $('adminSoftwareViewer').hidden = !prepared || Boolean(window.Lookbook3D?.available) || !adminSoftware;
+  if(prepared && adminSoftware && softwareSource!==previewURL){
+    softwareSource=previewURL;
+    adminSoftware.load(previewURL).then(ok=>{if(ok){$('adminSoftwareViewer').hidden=false;adminSoftware.draw();$('threeDHint').hidden=true;}}).catch(e=>{$('adminSoftwareViewer').hidden=true;$('threeDHint').hidden=false;$('threeDHint').textContent=e.message;});
+  }
   $('threeDState').textContent = prepared ? '공개 준비 완료' : hasItem ? '3D 준비 필요' : '의상을 선택해주세요';
   $('threeDHint').hidden = Boolean(prepared);
+  if (prepared && !window.Lookbook3D?.available) { $('threeDHint').hidden = false; $('threeDHint').textContent = Lookbook3D.message || '3D 표시 준비 중…'; }
   $('generate3DBtn').disabled = busy || publishing || !hasItem || !state.current;
   $('importGLBBtn').disabled = busy || publishing || !hasItem || !state.model;
   $('publishBtn').disabled = busy || publishing;
@@ -361,6 +367,7 @@ function bind(){
 async function init(){
   try {db=await openDB();const saved=await new Promise((resolve,reject)=>{const r=db.transaction('project').objectStore('project').get('current');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});if(saved)state=Core.normalizeProject(saved);}catch(e){feedback('브라우저 자동 저장을 사용할 수 없거나 이전 데이터를 읽지 못했습니다. ‘프로젝트 저장’으로 작업을 보관해주세요.');}
   bind();render();
+  Lookbook3D.ready.then(ready=>{if(!ready)try{adminSoftware=new LookbookSoftware3D.Viewer($('adminSoftwareViewer'));}catch(_){}render3D();});
   const params=new URLSearchParams(location.hash.slice(1)),incoming=params.get('local-token');
   if(incoming){setToken(incoming);history.replaceState(null,'',location.pathname+location.search);}
   if(token){const ok=await checkConnection(Boolean(incoming));if(incoming&&!ok)dialog('connectDialog');}

@@ -357,7 +357,7 @@ class Handler(BaseHTTPRequestHandler):
         static = {'/': ('index.html', 'text/html'), '/index.html': ('index.html', 'text/html'), '/admin.html': ('admin.html', 'text/html'), '/favicon.svg': ('favicon.svg', 'image/svg+xml'), '/catalog.json': ('catalog.json', 'application/json'), '/vendor/model-viewer.min.js': ('vendor/model-viewer.min.js', 'text/javascript')}
         for name in ('styles.css', 'showroom.css'):
             static['/' + name] = (name, 'text/css')
-        for name in ('app.js', 'core.js', 'catalog-core.js', 'viewer.js', 'admin-auth.js', 'github-publisher.js'):
+        for name in ('app.js', 'core.js', 'catalog-core.js', 'viewer.js', 'viewer-support.js', 'software-3d.js', 'admin-auth.js', 'github-publisher.js'):
             static['/' + name] = (name, 'text/javascript')
         if path == '/demo/catalog.json':
             static[path] = ('demo/catalog.json', 'application/json')
