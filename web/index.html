@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="모델과 옷 사진으로 만드는 나만의 룩북. 내 PC의 AI로 가상착용하고 쿠팡 상품 링크까지 함께 보관하세요.">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:8765; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>나만의 룩북 · LOOKBOOK STUDIO</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./core.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="룩북 스튜디오 처음 화면"><span class="brand-mark" data-icon="hanger"></span><span>LOOKBOOK<span class="brand-sub">나만의 피팅 스튜디오</span></span></a>
+    <div class="top-actions"><button id="connectBtn" class="connection"><span class="status-dot"></span><span id="connectionLabel">내 PC AI 연결</span><span data-icon="arrow-up-right"></span></button><button id="helpBtn" class="icon-button" aria-label="사용 방법" data-icon="help"></button></div>
+  </header>
+  <main>
+    <section class="intro">
+      <div><div class="eyebrow"><span></span> YOUR OWN FITTING ROOM</div><h1>나를 위한, 새로운 조합.</h1><p>마음에 드는 옷을 골라보세요. 나만의 모델이 입어드릴게요.</p></div>
+      <div class="intro-note"><span data-icon="lock"></span><span>사진은 내 브라우저에<br><strong>AI 합성은 내 PC에서</strong></span></div>
+    </section>
+
+    <div class="workspace-nav"><div class="tabs" role="tablist" aria-label="작업 화면"><button id="studioTab" class="tab active" role="tab" aria-selected="true" aria-controls="studioPanel">피팅 스튜디오</button><button id="looksTab" class="tab" role="tab" aria-selected="false" aria-controls="looksPanel">내 룩북 <span id="looksCount">0</span></button></div><div class="project-actions"><span id="saveStatus" class="save-status">이 브라우저에 저장</span><button id="importBtn" class="text-button"><span data-icon="folder"></span>불러오기</button><button id="exportBtn" class="text-button"><span data-icon="download"></span>프로젝트 저장</button></div></div>
+
+    <section id="studioPanel" role="tabpanel" aria-labelledby="studioTab">
+      <div class="studio-grid">
+        <aside class="wardrobe left-wardrobe"><div class="section-heading"><h2>나의 옷장</h2><span>01 — 03</span></div><div id="leftSlots" class="slot-list"></div></aside>
+        <section class="fitting-column" aria-label="모델과 가상착용 결과">
+          <div class="model-toolbar"><span><span class="tiny-dot"></span> <span id="modelLabel">MY MODEL</span></span><button id="modelUploadBtn" class="text-button"><span data-icon="upload"></span><span id="modelUploadLabel">모델 사진</span></button></div>
+          <div id="modelStage" class="model-stage">
+            <div class="stage-lines" aria-hidden="true"></div>
+            <div id="emptyModel" class="empty-model">
+              <svg class="model-illustration" viewBox="0 0 320 480" fill="none" aria-hidden="true"><ellipse cx="160" cy="452" rx="76" ry="10" fill="#dedbd3"/><path d="M125 109c-4-17-3-37 0-49 4-22 18-34 36-34s34 13 37 36c2 15 1 32-3 48" fill="#ddd8ce"/><ellipse cx="160" cy="76" rx="30" ry="38" fill="#e9e1d7"/><path d="M146 108v21l-32 12-16 17-24 120 17 5 31-97-3 91-6 154h27l20-132 20 132h27l-7-154-2-91 31 97 17-5-24-120-16-17-32-12v-21" fill="#e8e1d7"/><path d="M114 141l27-10c6 14 32 14 38 0l27 10-12 45 6 87h-81l7-87z" fill="#b7bbb0"/><path d="M119 273h81l7 153h-27l-20-125-20 125h-27z" fill="#c8c6bb"/><path d="M113 426h27l-2 16h-38c-2-6 5-12 13-16m67 0h27c8 4 15 10 13 16h-38z" fill="#827f73"/><path d="M126 67c8-1 22-5 30-17 11 13 24 19 37 20-1-27-17-40-32-40-19 0-32 14-35 37" fill="#aaa598"/><path d="M160 279v20m-40-26h80" stroke="#a9a79a" stroke-width="2"/></svg>
+              <div class="model-empty-caption"><span class="eyebrow">START WITH YOU</span><h2>오늘의 모델을 추가하세요</h2><p>정면에서 찍은 사진이 가장 좋아요.</p><button id="emptyUploadBtn" class="primary-button"><span data-icon="plus"></span>모델 사진 올리기</button><small>JPG · PNG · WebP / 최대 15MB</small></div>
+            </div>
+            <img id="modelImage" class="model-image" alt="업로드한 모델" hidden>
+            <span id="resultBadge" class="result-badge" hidden>AI 피팅 결과</span>
+            <div id="processing" class="processing" hidden role="status" aria-live="polite"><div class="spinner"></div><strong id="processingTitle">옷을 입혀보고 있어요</strong><p id="processingText">내 PC에서 AI가 작업 중입니다.</p><span id="elapsed">0초</span><button id="cancelBtn" class="secondary-button">작업 취소</button></div>
+            <div class="stage-number" aria-hidden="true">LOOK / <span id="lookNumber">01</span></div>
+          </div>
+          <div class="stage-actions"><button id="originalBtn" class="text-button" disabled><span data-icon="compare"></span>원본 보기</button><button id="resetBtn" class="text-button" disabled><span data-icon="reset"></span>처음부터</button><button id="downloadBtn" class="text-button" disabled><span data-icon="download"></span>이미지 저장</button></div>
+          <div id="productPanel" class="product-panel"><div class="product-heading"><span data-icon="bag"></span><h3 id="productTitle">착용 아이템</h3></div><div id="productList"><p class="muted">옷을 입히면 쿠팡 상품 링크가 여기에 표시됩니다.</p></div></div>
+        </section>
+        <aside class="wardrobe right-wardrobe"><div class="section-heading"><h2>더해볼 아이템</h2><span>04 — 06</span></div><div id="rightSlots" class="slot-list"></div></aside>
+      </div>
+      <div class="studio-bottom"><div class="step-hint"><span>01</span>모델 사진 올리기<i></i><span>02</span>옷과 쿠팡 링크 등록<i></i><span>03</span>옷을 눌러 AI 피팅</div><div class="generation-controls"><label for="quality">합성 품질</label><select id="quality"><option value="20">빠르게</option><option value="30" selected>균형 있게</option><option value="50">세밀하게</option></select><label class="check-label"><input id="layerMode" type="checkbox">현재 룩에 더하기</label></div></div>
+      <div id="feedback" class="feedback" role="status" hidden></div>
+    </section>
+
+    <section id="looksPanel" role="tabpanel" aria-labelledby="looksTab" hidden><div class="looks-heading"><div><h2>마음에 드는 조합을 모아두세요.</h2><p>완성한 룩은 이 브라우저에 최대 20개까지 자동 보관됩니다.</p></div></div><div id="lookGallery" class="look-gallery"></div></section>
+
+    <footer><span>LOOKBOOK STUDIO <b>·</b> EVERYDAY, A NEW POSSIBILITY.</span><a href="https://github.com/mkj5956/Cookbook-site" target="_blank" rel="noopener noreferrer">프로그램 다운로드 <span data-icon="arrow-up-right"></span></a></footer>
+  </main>
+
+  <dialog id="garmentDialog"><form id="garmentForm" novalidate><div class="dialog-heading"><div><span class="eyebrow" id="slotEyebrow">WARDROBE 01</span><h2>나의 옷 등록하기</h2></div><button type="button" class="icon-button dialog-close" aria-label="닫기" data-icon="close"></button></div><button type="button" id="garmentImageBtn" class="garment-drop"><img id="garmentPreview" alt="등록할 의상" hidden><span id="garmentPlaceholder"><span data-icon="upload"></span><strong>옷 사진을 선택하거나 끌어놓으세요</strong><small>상품 단독 사진 또는 옷을 입은 사진 · 최대 15MB</small></span></button><label for="garmentName">상품명</label><input id="garmentName" type="text" maxlength="80" placeholder="예: 아이보리 리브 니트"><div class="form-row"><div><label for="garmentCategory">옷 종류</label><select id="garmentCategory"><option value="tops">상의 · 아우터</option><option value="bottoms">하의 · 스커트</option><option value="one-pieces">원피스 · 점프수트</option></select></div><div><label for="garmentPhotoType">사진 형태</label><select id="garmentPhotoType"><option value="flat-lay">옷만 있는 상품 사진</option><option value="model">사람이 입은 사진</option></select></div></div><label for="garmentLink">쿠팡 상품 링크 <span class="optional">선택</span></label><div class="input-with-icon"><span data-icon="link"></span><input id="garmentLink" type="url" maxlength="2048" placeholder="https://www.coupang.com/..." autocomplete="off"></div><p class="field-hint">쿠팡 상품 주소 또는 link.coupang.com 공유 링크를 붙여넣으세요.</p><p id="garmentError" class="form-error" role="alert" hidden></p><div class="dialog-footer"><button type="button" id="deleteGarmentBtn" class="text-button danger">이 옷 삭제</button><button type="submit" class="primary-button">옷장에 저장 <span data-icon="arrow-right"></span></button></div></form></dialog>
+
+  <dialog id="connectDialog"><div class="dialog-heading"><div><span class="eyebrow">ON YOUR COMPUTER</span><h2>내 PC의 AI와 연결하기</h2></div><button class="icon-button dialog-close" aria-label="닫기" data-icon="close"></button></div><p class="dialog-intro">사이트는 공개되어 있지만, 사진 합성은 본인 PC에서만 실행됩니다. 다른 방문자가 내 PC의 AI를 사용할 수는 없어요.</p><ol class="setup-steps"><li><b>프로그램 준비</b><span>저장소를 ZIP으로 내려받고 압축을 풀어주세요.</span><a href="https://github.com/mkj5956/Cookbook-site/archive/refs/heads/main.zip" class="text-button">윈도우 프로그램 다운로드 <span data-icon="download"></span></a></li><li><b>처음 한 번 설치</b><span><code>local-ai/1_INSTALL.bat</code>를 더블클릭하세요. AI 파일 다운로드에 인터넷이 필요합니다.</span></li><li><b>AI 실행</b><span><code>local-ai/2_START.bat</code>를 더블클릭하면 연결된 룩북이 열립니다.</span></li></ol><div class="hardware-note"><span data-icon="info"></span><p>NVIDIA 그래픽카드가 필요합니다. AI 모델의 안내 기준은 약 8GB VRAM이며, 이 구성은 RTX 30 시리즈 이상·12GB 이상을 권장합니다. <code>0_CHECK_PC.bat</code>로 확인할 수 있어요.</p></div><details><summary>직접 연결 코드를 입력할게요</summary><label for="connectionToken">실행 창에 표시된 연결 코드</label><input id="connectionToken" type="password" autocomplete="off" placeholder="연결 코드를 붙여넣으세요"><button id="manualConnectBtn" class="primary-button">연결 확인</button></details><p id="connectionMessage" class="form-error" role="status" hidden></p><p class="field-hint">Chrome에서 ‘로컬 네트워크 접근’ 안내가 뜨면 허용하세요. 사진은 GitHub나 외부 AI 서비스로 전송되지 않습니다.</p><div class="dialog-footer"><button id="disconnectBtn" class="text-button danger">연결 해제</button><button id="testConnectionBtn" class="secondary-button">연결 다시 확인</button></div></dialog>
+
+  <dialog id="helpDialog"><div class="dialog-heading"><div><span class="eyebrow">A LITTLE GUIDE</span><h2>나만의 룩북 사용법</h2></div><button class="icon-button dialog-close" aria-label="닫기" data-icon="close"></button></div><ol class="setup-steps"><li><b>가운데에 모델 사진을 올려주세요.</b><span>팔이 몸을 가리지 않는 정면 사진을 권장합니다.</span></li><li><b>양옆 6칸에 옷을 등록하세요.</b><span>옷 종류, 사진 형태, 상품명과 쿠팡 주소를 함께 저장할 수 있어요.</span></li><li><b>등록한 옷을 클릭하세요.</b><span>PC의 AI가 옷을 입힌 사진을 만듭니다. ‘현재 룩에 더하기’를 켜면 완성된 룩에 다음 옷을 합성합니다. 반복 합성하면 얼굴과 디테일이 변할 수 있어요.</span></li><li><b>모델 아래에서 상품을 확인하세요.</b><span>쿠팡 버튼으로 해당 상품을 열 수 있습니다. 완성한 사진은 저장하거나 내 룩북에서 다시 볼 수 있어요.</span></li></ol><div class="hardware-note"><p>이 결과는 스타일 미리보기입니다. 실제 사이즈·핏·무늬의 정확성을 보장하지 않습니다. 브라우저 데이터를 지우면 사진과 룩북이 사라지므로 ‘프로젝트 저장’으로 백업하세요. 쿠팡 링크는 직접 등록하며 가격·재고를 가져오지는 않습니다.</p></div></dialog>
+
+  <input id="modelFile" type="file" accept="image/jpeg,image/png,image/webp" hidden><input id="garmentFile" type="file" accept="image/jpeg,image/png,image/webp" hidden><input id="projectFile" type="file" accept=".json,.lookbook" hidden>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <noscript>룩북을 사용하려면 브라우저에서 JavaScript를 허용해주세요.</noscript>
+</body>
+</html>

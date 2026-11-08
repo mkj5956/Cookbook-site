@@ -1,0 +1,7 @@
+# PyTorch is installed separately from the official CUDA wheel index.
+https://github.com/fashn-AI/fashn-vton-1.5/archive/7c0f10af3f91ad4048fe9729c470a13ef905d25a.zip
+onnxruntime-gpu>=1.21,<2
+fashn-human-parser>=0.1.1,<0.2
+numpy>=1.26,<3
+pillow>=11.3,<13
+huggingface_hub>=0.35,<1

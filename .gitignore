@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+local-ai/weights/
+local-ai/cache/
+local-ai/runtime/
+local-ai/data/
+local-ai/logs/
+local-ai/vendor/
+local-ai/.ready.json
+*.lookbook.json
+.openai/
