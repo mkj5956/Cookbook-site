@@ -12,7 +12,7 @@
       publisher = new LookbookPublisher(token); await publisher.authenticate();
       $('loginPanel').hidden = true; $('adminWorkspace').hidden = false;
       window.LookbookAdmin = Object.freeze({ authenticated: true, isPublishing: () => uploading });
-      const script = document.createElement('script'); script.src = './app.js'; document.head.append(script);
+      const script = document.createElement('script'); script.src = './app.js?v=20261108-3d-3'; document.head.append(script);
       $('adminAccount').textContent = 'mkj5956 · 관리자';
     } catch (e) { publisher?.logout(); publisher = null; $('loginError').textContent = e.message; $('loginError').hidden = false; }
     finally { $('loginButton').disabled = false; }

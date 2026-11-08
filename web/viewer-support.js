@@ -11,7 +11,7 @@
       resolve(false); return;
     }
     gl.getExtension('WEBGL_lose_context')?.loseContext();
-    const script = document.createElement('script'); script.type = 'module'; script.src = './vendor/model-viewer.min.js';
+    const script = document.createElement('script'); script.type = 'module'; script.src = './vendor/model-viewer.min.js?v=20261108-3d-3';
     const timer = setTimeout(() => {support.message = '3D 화면을 준비하지 못했습니다. 페이지를 새로고침해주세요.';resolve(false);},30000);
     script.onload = () => {clearTimeout(timer);support.available = Boolean(customElements.get('model-viewer'));resolve(support.available);};
     script.onerror = () => {clearTimeout(timer);support.message = '3D 프로그램을 불러오지 못했습니다. 연결을 확인하고 새로고침해주세요.';resolve(false);};
